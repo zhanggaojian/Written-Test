@@ -1,0 +1,57 @@
+题目的大致意思是，一个人每天最多吃两顿饭，中餐和晚餐，每餐只能选择一个套餐，每个套餐对应了一个热量值和美味值，这个人吃饭必须得满足两餐的总美味值高于预期，两顿饭都可以不吃。
+现在要求在满足美味值的条件下，热量值要最小。
+输入三个数，m,n,t分别代表中餐套餐数目，晚餐套餐数目和美味值标准。要求输出最小摄入的热量值。如果怎么都达不到美味值，输出-1
+
+
+思路：根据美味值进行排序，递增排序，如果美味值相同的话，热量值递增排序
+遍历的时候，中餐按照升序遍历，晚餐按照降序遍历
+（在中餐选择了较小的美味值的情况下，能吃的晚餐的种类，在中餐美味值更大二的时候仍然可以吃）
+
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+
+bool cmp(pair<int, int> a, pair<int, int> b) {
+	if (a.second == b.second)//如果美味值相同，则按照热量递增排序（要选择较小的热量值)
+		return a.first < b.first;
+	return a.second < b.second;
+}
+int main() {
+
+	int n, m, t;
+	cin >> n >> m >> t;
+
+	vector<pair<int, int>> s1(n + 1, make_pair(0, 0));//中餐，热量值，美味值
+	vector<pair<int, int>> s2(m + 1, make_pair(0, 0));//晚餐，热量值，美味值
+
+	for (int i = 1; i <= n; i++) {
+		int x, y;
+		cin >> x >> y;
+		s1[i] = make_pair(x, y);
+	}
+
+	for (int i = 1; i <= m; i++) {
+		int x, y;
+		cin >> x >> y;
+		s2[i] = make_pair(x, y);
+	}
+	sort(s1.begin(), s1.end(), cmp);
+	sort(s2.begin(), s2.end(), cmp);
+	int res = INT_MAX;
+	int minVal = INT_MAX;
+	for (int i = 0; i <= n; i++) {//对于每一个中餐，找出满足条件的晚餐的热量最小值
+		int mh = t-s1[i].second;//中餐取最小的晚餐美味值，然后剩下的美味值为mh
+		for (int j = m; j >= 0; j--) {
+			if (s2[j].second >= mh) {
+				minVal = min(minVal, s2[j].first);
+			}
+			else break;
+		}
+
+		res = min(res,minVal+s1[i].first);
+	}
+	res = res == INT_MAX ? -1 : res;
+	cout << res << endl;
+	return 0;
+}
